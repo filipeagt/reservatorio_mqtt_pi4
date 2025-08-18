@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Nível do Reservatório</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <link rel="stylesheet" href="{% static 'nivel/css/style.css' %}">
+</head>
+<body>
+  <h1>Nível do Reservatório</h1>
+
+  <div class="container">
+    <!-- Tanque visual -->
+    <div class="reservatorio-container">
+      <div class="reservatorio">
+        <div id="nivelAgua" class="nivel-agua" style="height: 0%"></div>
+      </div>
+      <div id="nivelLabel" class="nivel-label">Nível: --%</div>
+      <div id="status" class="status">Carregando dados históricos...</div>
+    </div>
+
+    <!-- Gráfico -->
+    <div class="chart-container">
+      <canvas id="waterLevelChart"></canvas>
+    </div>
+  </div>
+
+  <script src="{% static 'nivel/js/script.js' %}"></script>
+</body>
+</html>

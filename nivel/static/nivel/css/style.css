@@ -1,0 +1,66 @@
+body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      padding: 20px;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 50px;
+    }
+
+    .reservatorio-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .reservatorio {
+      width: 100px;
+      height: 300px;
+      border: 3px solid #0077cc;
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      background-color: #fff;
+    }
+
+    .nivel-agua {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background-color: #4da6ff;
+      transition: height 0.5s ease-in-out;
+    }
+
+    .nivel-label {
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .chart-container {
+      max-width: 900px;
+      width: 100%;
+    }
+
+    canvas {
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 8px;
+    }
+
+    .status {
+      font-size: 14px;
+      color: #666;
+      margin-top: 10px;
+    }
