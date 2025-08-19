@@ -29,10 +29,3 @@ urlpatterns = [
     path('', include('nivel.urls')),
 ]
 
-from django.urls import path, include
-
-urlpatterns = [
-    path('', include('nivel.urls')),
-    path('admin/', admin.site.urls),
-]
-

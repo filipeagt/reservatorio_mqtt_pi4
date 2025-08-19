@@ -1,7 +1,7 @@
 from django.db import models
 
 class NivelReservatorio(models.Model):
-    nivel = models.FloatField()
+    nivel = models.IntegerField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
