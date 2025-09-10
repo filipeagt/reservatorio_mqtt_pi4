@@ -1,66 +1,375 @@
+:root {
+    --cor0: #e6f7ff;
+    --cor1: #F0FAFF;
+    --cor2: #eff5fa;
+    --cor3: #63E4F2;
+    --cor4: #2ECEF2;
+    --cor5: #263173;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box
+}
+
 body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f6f8;
-      padding: 20px;
-      color: #333;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.8em;
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+nav#sidebar {
+    display: block;
+    width: 150px;
+    flex-shrink: 0;
+    padding: 5px;
+    min-height: 100vh;
+    background-color: var(--cor1);
+    border-right: 1px solid gainsboro;
+}
+
+nav#sidebar h2 {
+    font-size: 1.1em;
+    margin-left: -5px;
+    font-weight: 700;
+    padding: 5px 0px;
+}
+
+nav#sidebar h2>span {
+    display: inline-block;
+    background-color: var(--cor3);
+    padding: 2px;
+    border-radius: 5px;
+    color: white;
+    margin-left: -5px;
+    width: 28px;
+    font-size: 1.5em;
+}
+
+nav#sidebar>a {
+    text-decoration: none;
+    color: black;
+    display: block;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+nav#sidebar>a:hover {
+    background-color: var(--cor0);
+}
+
+nav#sidebar>a.logo:hover {
+    background-color: var(--cor1);
+}
+
+nav#sidebar>a.active {
+    background-color: var(--cor3);
+    color: white;
+}
+
+nav#sidebar>a span {
+    margin-right: 10px;
+}
+
+nav#sidebar>a.esconde {
+    display: none;
+}
+
+header {
+    padding: 15px;
+    min-height: 50px;
+}
+
+main {
+    display: block;
+    position: relative;
+    width: 100vw;
+    padding: 0px;
+    padding-bottom: 50px;   /*Espaçamento footer*/
+    background-color: var(--cor2);
+    min-height: 105vh;
+    height: 100%;
+    overflow-x: auto;
+}
+
+.disabled {
+    color: grey;
+    font-weight: 400;
+}
+
+#cards {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 10px;
+}
+
+#cards>.card {
+    font-size: 1.2em;
+    height: 70px;
+    width: 100%;
+    border-radius: 5px;
+    border: 1px solid var(--cor1);
+    background-image: linear-gradient(to right, var(--cor1), var(--cor0));
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    margin: 5px 0px;
+    padding: 8px 15px;
+    position: relative;
+}
+
+.card button {
+    padding: 3px;
+    font-size: 1.5em;
+    position: absolute;
+    right: 15px;
+    top: 17px;
+}
+
+.card button>.mdi {
+    margin-right: 0px;
+}
+
+.card .mdi {
+    color: var(--cor4);
+    margin-right: 5px;
+}
+
+.card .valor,
+.card .unidade {
+    font-size: 1.2em;
+    font-weight: 800;
+}
+
+.card .legenda {
+    font-size: 0.8em;
+}
+
+#volume-meter {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    height: 70%;
+    min-width: 30px;
+    writing-mode: vertical-lr;
+    direction: rtl;
+    transform: translate(-50%, -50%);
+    appearance: none;
+}
+
+#volume-meter::-webkit-progress-bar {
+    background-color: var(--cor2);
+    border: 1px solid gainsboro;
+}
+
+#volume-meter::-webkit-progress-value {
+    background-color: var(--cor4);
+}
+
+#volume-meter::-moz-progress-bar {
+    background-color: #2ECEF2;
+}
+
+.status {
+    display: inline-block;
+    height: 10px;
+    width: 10px;
+    border-radius: 5px;
+    background-color: var(--cor4);
+}
+
+.status.on {
+    background-color: lightgreen;
+}
+
+.status.off {
+    background-color: lightcoral;
+}
+
+.status.alert {
+    background-color: rgb(255, 225, 95);
+}
+
+#status-volume {
+    width: fit-content;
+    height: 16px;
+    border-radius: 8px;
+    padding: 0px 5px;
+    font-size: .8em;
+    font-weight: 600;
+    color: white;
+    position: absolute;
+    right: 15px;
+}
+
+#status-volume>.mdi {
+    color: white;
+}
+
+
+
+#charts {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 10px;
+
+}
+
+#charts>.chart {
+    height: 250px;
+    width: 100%;
+    border-radius: 5px;
+    border: 1px solid var(--cor1);
+    background-image: linear-gradient(to right, var(--cor1), var(--cor0));
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    margin: 5px 0px;
+}
+
+#tabela {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+}
+
+#tabela table {
+    display: block;
+    border-collapse: collapse;
+    border-radius: 5px;
+    border: 1px solid var(--cor1);
+    background-image: linear-gradient(to right, var(--cor1), var(--cor0));
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    margin: 15px 0px;
+    padding: 10px;
+}
+
+#tabela td,
+th {
+    padding: 10px;
+}
+
+#tabela tr {
+    border-bottom: 1px solid gainsboro;
+}
+
+.pagination {
+    font-size: 1rem;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: center;
+    list-style: none;
+}
+
+.page-link {
+    position: relative;
+    display: block;
+    padding: 8px 14px;
+    text-decoration: none;
+    color: var(--cor4);
+    border: 1px solid gainsboro;
+    background-color: var(--cor1);
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.page-link:hover {
+    z-index: 2;
+    background-color: var(--cor0);
+    border-color: var(--cor4);
+}
+
+.page-link:focus {
+    z-index: 2;
+    background-color: var(--cor0);
+    border-color: var(--cor4);
+}
+
+.page-link.active,
+.active>.page-link {
+    z-index: 3;
+    color: var(--cor1);
+    background-color: var(--cor4);
+}
+
+.page-link.disabled,
+.disabled>.page-link {
+    color: grey;
+    pointer-events: none;
+    background-color: var(--cor2);
+    border-color: gainsboro;
+}
+
+.page-item:not(:first-child) .page-link {
+    margin-left: -1px;
+}
+
+.page-item:first-child .page-link {
+    border-radius: 5px 0px 0px 5px;
+}
+
+.page-item:last-child .page-link {
+    border-radius: 0px 5px 5px 0px;
+}
+
+footer {
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    padding: 20px;
+    text-align: center;
+}
+
+@media screen and (min-width: 600px) {
+
+    #volume-meter {
+        display: block;
+    }
+}
+
+@media screen and (min-width: 768px) {
+
+    #cards>.card {
+        width: 48%;
+        height: 100px;
+        padding: 15px;
     }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 30px;
+    .card .legenda {
+        margin-top: 10px;
     }
 
-    .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 50px;
+    .card button {
+        top: 30px;
     }
 
-    .reservatorio-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    #charts>.chart {
+        height: 280px;
     }
 
-    .reservatorio {
-      width: 100px;
-      height: 300px;
-      border: 3px solid #0077cc;
-      border-radius: 10px;
-      position: relative;
-      overflow: hidden;
-      background-color: #fff;
+}
+
+@media screen and (min-width: 992px) {
+
+    #cards>.card {
+        width: 30%;
     }
 
-    .nivel-agua {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      background-color: #4da6ff;
-      transition: height 0.5s ease-in-out;
+}
+
+@media screen and (min-width: 1200px) {
+
+    #cards>.card {
+        width: 23%;
     }
 
-    .nivel-label {
-      margin-top: 10px;
-      font-size: 18px;
-      font-weight: bold;
+    #charts>.chart {
+        width: 48.5%;
     }
-
-    .chart-container {
-      max-width: 900px;
-      width: 100%;
-    }
-
-    canvas {
-      background: #fff;
-      border: 1px solid #ccc;
-      padding: 15px;
-      border-radius: 8px;
-    }
-
-    .status {
-      font-size: 14px;
-      color: #666;
-      margin-top: 10px;
-    }
+}

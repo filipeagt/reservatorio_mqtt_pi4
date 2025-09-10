@@ -11,7 +11,7 @@ from nivel.models import NivelReservatorio
 # Configuração do MQTT
 MQTT_BROKER = "test.mosquitto.org"
 MQTT_PORT = 1883
-MQTT_TOPIC = "pi/reservatorio/nivel"
+MQTT_TOPIC = "pi/reservatorio/volume"
 
 def on_connect(client, userdata, flags, rc):
     print(f"Conectado ao MQTT com código {rc}")
@@ -21,11 +21,11 @@ def on_message(client, userdata, msg):
     try:
         payload = msg.payload.decode()
         nivel = int(payload)
-        if 0 <= nivel <= 100:
+        if 0 <= nivel <= 1000:
             NivelReservatorio.objects.create(nivel=nivel)
-            print(f"[MQTT] Nível recebido e salvo: {nivel}%")
+            print(f"[MQTT] Nível recebido e salvo: {nivel}")
         else:
-            print("Valor fora do intervalo 0–100")
+            print("Valor fora do intervalo 0–1000")
 
     except Exception as e:
         print(f"Erro ao processar mensagem MQTT: {e}")

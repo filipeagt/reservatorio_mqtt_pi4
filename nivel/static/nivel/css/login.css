@@ -1,0 +1,228 @@
+@charset "UTF-8";
+
+/*
+Paleta de cores:
+#B9B8BF
+#e98528
+*/
+
+:root {
+    --cor1: #F0FAFF;
+    --cor2: #eff5fa;
+    --cor3: #63E4F2;
+    --cor4: #2ECEF2;
+    --cor5: #263173;
+}
+
+* {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    padding: 0px;
+    margin: 0px;
+    box-sizing: border-box;
+}
+
+body, html {
+    background-color: var(--cor2);
+    height: 100vh;
+    width: 100vw;
+}
+
+main {    
+    height: 100vh;
+    width: 100vw;
+
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+section#login {    
+    
+    overflow: hidden;
+
+    background-color: white;
+    width: 270px;
+    height: 500px;
+    border-radius: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.445);
+    
+    
+    transition: width .3s, height .3s;
+    transition-timing-function: ease;
+}
+
+
+section#login > div#imagem {
+    display: block;
+    background:  var(--cor2) url('../img/agua.jpg');
+    background-size: cover;
+    background-position: left center;
+    height: 200px;
+}
+
+section#login > div#formulario {
+    display: block;
+    padding: 10px;
+}
+
+div#formulario > h1 {
+    text-align: center;
+    margin: 10px;
+}
+
+div#formulario > p {
+    font-size: 0.8em;
+}
+
+form > div.campo {
+    background-color: var(--cor5);
+    border: 2px solid var(--cor5);
+    display: block;
+    width: 100%;
+    height: 40px;
+    border-radius: 5px;
+    margin: 5px 0px;
+}
+
+div.campo > label {
+    display: none;
+}
+
+div.campo > span {
+    color: white;
+    /*background-color: black;*/
+    font-size: 2em;
+    width: 40px;
+    padding: 4px;
+}
+
+div.campo > input {
+    background-color: var(--cor2);
+    font-size: 1em;
+    width: calc(100% - 44px);
+    height: 100%;    
+    border: 0px;
+    border-radius: 5px;
+    padding: 4px;
+    transform: translateY(-12px);
+}
+
+div.campo > input:focus-within {
+    background-color: white;
+    border: 0px;
+}
+
+form > input[type=submit] {
+    display: block;
+    font-size: 1em;
+    width: 100%;
+    height: 40px;
+    background-color: var(--cor5);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.300);
+    cursor: pointer;
+}
+
+form > input[type=submit]:hover {
+    background-color: white;
+    color: var(--cor5);
+    border: 1px solid var(--cor5);
+}
+
+form > a.botao {
+    display: block;
+    text-align: center;    
+    font-size: 1em;
+    width: 100%;
+    height: 40px;
+    margin-top: 5px;
+    padding-top: 10px;
+    background-color: white;
+    color: var(--cor5);
+    border: 1px solid var(--cor5);
+    border-radius: 5px;
+    text-decoration: none;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.300);
+}
+
+form > a.botao:hover {
+    background-color: var(--cor5);
+    color: white;
+}
+
+form > a.botao > span {
+    font-size: .9em;    
+}
+
+/* Typical device breakpoints 
+------------------------------
+Pequenas telas: até 600px
+Celular: de 600px até 768px
+Tablet: de 768px até 992px
+Desktop: de 992px até 1200px
+Grandes telas: maior que 1200px 
+*/
+
+@media screen and (min-width: 768px) and (max-width: 992px) { /* Configuração para tablet */
+
+    body {
+        background-image: linear-gradient(to bottom, var(--cor2),var(--cor5));
+    }
+
+    section#login {
+        width: 80vw;
+        height: 290px;
+    }
+
+    section#login > div#imagem {
+        float: left;
+        width: 30%;
+        height: 100%;
+    }
+
+    section#login > div#formulario {
+        float: right;
+        width: 70%;
+        
+    }
+
+    div#formulario > p {
+        font-size: 1em;
+    }
+}
+
+@media screen and (min-width: 992px) { /* Configurações para desktop */
+
+    body {
+        background-image: linear-gradient(to bottom, var(--cor2),var(--cor5));
+    }
+
+    section#login {
+        width: 900px;
+        height: 310px;
+    }
+
+    section#login > div#imagem {
+        float: right;
+        width: 50%;
+        height: 100%;
+    }
+
+    section#login > div#formulario {
+        float: left;
+        width: 50%;
+        
+    }
+
+    div#formulario > h1 {
+        font-size: 2em;
+    }
+
+    div#formulario > p {
+        font-size: 1.1em;
+        margin: 10px 0px;
+    }
+}

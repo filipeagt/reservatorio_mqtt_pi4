@@ -1,133 +1,151 @@
-const nivelAgua = document.getElementById('nivelAgua');
-    const nivelLabel = document.getElementById('nivelLabel');
-    const status = document.getElementById('status');
-    const ctx = document.getElementById('waterLevelChart').getContext('2d');
+const volumeAgua = document.getElementById('volume-meter');
+const volumeLabel = document.getElementById('volume-meter-label');
+const statusVolume = document.getElementById('status-volume');
+const mqttStatusTxt = document.getElementById('mqtt-status-txt');
+const ledMqtt = document.getElementById('status-mqtt');
+const mqttValor = document.getElementById('valor-mqtt');
+const ctxVolume = document.getElementById('waterVolumeChart').getContext('2d');
 
-    const labels = [];
-    const dados = [];
+const labels = [];
+const dados = [];
 
-    // Cria o gráfico inicialmente vazio
-    const chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: 'Nível (%)',
-          data: dados,
-          backgroundColor: 'rgba(54, 162, 235, 0.2)',
-          borderColor: 'rgba(54, 162, 235, 1)',
-          borderWidth: 2,
-          fill: true,
-          tension: 0.3,
-          pointRadius: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        animation: false,
-        scales: {
-          y: {
-            min: 0,
-            max: 100,
-            title: {
-              display: true,
-              text: 'Nível (%)'
-            }
-          },
-          x: {
-            title: {
-              display: true,
-              text: 'Horário'
-            }
-          }
+// Cria o gráfico inicialmente vazio
+const chartVolume = new Chart(ctxVolume, {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [{
+      label: 'Volume (L)',
+      data: dados,
+      backgroundColor: '#63E4F2',
+      borderColor: '#2ECEF2',
+      borderWidth: 2,
+      fill: true,
+      tension: 0.3,
+      pointRadius: 2
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: true,
+    scales: {
+      y: {
+        min: 0,
+        max: 1000,
+        title: {
+          display: true,
+          text: 'Volume (L)'
         }
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Horário'
+        }
+      }
+    }
+  }
+});
+
+// Carrega dados do JSON local
+async function carregarHistorico() {
+  try {
+    const response = await fetch('historico.json');
+    const json = await response.json();
+    const feeds = json.feeds;
+
+    feeds.forEach(feed => {
+      const volume = parseFloat(feed.field1);
+      const data = new Date(feed.created_at);
+      const hora = data.toLocaleString('pt-BR');
+
+      if (!isNaN(volume)) {
+        labels.push(hora);
+        dados.push(volume);
       }
     });
 
-    // Carrega dados do JSON local
-    async function carregarHistorico() {
-      try {
-        const response = await fetch('/historico.json');
-        const json = await response.json();
-        const feeds = json.feeds;
+    chartVolume.update();
 
-        feeds.forEach(feed => {
-          const nivel = parseFloat(feed.field1);
-          const data = new Date(feed.created_at);
-          const hora = data.toLocaleTimeString('pt-BR', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-          });
+    // Atualiza tanque com o último valor do histórico
+    const ultimoVolume = parseInt(dados[dados.length - 1]);
+    atualizaTanque(ultimoVolume);
 
-          if (!isNaN(nivel)) {
-            labels.push(hora);
-            dados.push(nivel);
-          }
-        });
+    mqttStatusTxt.textContent = 'Dados históricos carregados';
+    mqttValor.textContent = 'Conectando...';
+    conectarMQTT();
 
-        chart.update();
+  } catch (err) {
+    mqttStatusTxt.textContent = 'Erro ao carregar o arquivo JSON';
+    console.error(err);
+  }
+}
 
-        // Atualiza tanque com o último valor do histórico
-        const ultimoNivel = dados[dados.length - 1];
-        nivelAgua.style.height = `${ultimoNivel}%`;
-        nivelLabel.textContent = `Nível: ${ultimoNivel.toFixed(1)}%`;
+// Conecta ao broker MQTT
+function conectarMQTT() {
+  const broker = 'wss://test.mosquitto.org:8081';
+  const topico = 'pi/reservatorio/volume';
 
-        status.textContent = 'Dados históricos carregados. Conectando ao MQTT...';
-        conectarMQTT();
+  const client = mqtt.connect(broker);
 
-      } catch (err) {
-        status.textContent = 'Erro ao carregar o arquivo JSON';
-        console.error(err);
+  client.on('connect', () => {
+    mqttValor.textContent = 'Conectado';
+    mqttStatusTxt.textContent = `Inscrito no tópico "${topico}"`;
+    ledMqtt.classList.remove('alert');
+    ledMqtt.classList.add('on');
+    client.subscribe(topico);
+  });
+
+  client.on('message', (topic, message) => {
+    if (topic === topico) {
+      const volume = parseInt(message.toString());
+      if (!isNaN(volume) && volume >= 0 && volume <= 1000) {
+        // Atualiza tanque
+        atualizaTanque(volume);
+
+        // Adiciona ponto ao gráfico
+        const agora = new Date();
+        const hora = agora.toLocaleString('pt-BR');
+
+        labels.push(hora);
+        dados.push(volume);
+
+        // Mantém os últimos 50 pontos
+        if (labels.length > 50) {
+          labels.shift();
+          dados.shift();
+        }
+
+        chartVolume.update();
       }
     }
+  });
 
-    // Conecta ao broker MQTT
-    function conectarMQTT() {
-      const broker = 'wss://test.mosquitto.org:8081';
-      const topico = 'pi/reservatorio/nivel';
+  client.on('error', err => {
+    mqttValor.textContent = 'Erro'
+    mqttStatusTxt.textContent = 'Não foi possível conectar ao broker';
+    ledMqtt.classList.remove('alert');
+    ledMqtt.classList.add('off');
+    console.error('Erro MQTT:', err);
+  });
+}
 
-      const client = mqtt.connect(broker);
+function atualizaTanque(ultimoVolume) {
+  volumeAgua.value = `${ultimoVolume}`;
+  volumeLabel.textContent = `${ultimoVolume}`;
+  statusVolume.className = 'mdi mdi-water-alert status';
+  if (ultimoVolume < 250) {
+    statusVolume.textContent = 'Baixo';
+    statusVolume.classList.add('off');
+    alert('Nível baixo!');
+  } else if (ultimoVolume <= 950) {
+    statusVolume.textContent = 'Normal';
+  } else if (ultimoVolume > 950) {
+    statusVolume.textContent = 'Alto';
+    statusVolume.classList.add('alert');
+    alert('Risco de transbordamento!');
+  }
+}
 
-      client.on('connect', () => {
-        status.textContent = `Conectado ao MQTT e inscrito no tópico "${topico}"`;
-        client.subscribe(topico);
-      });
-
-      client.on('message', (topic, message) => {
-        if (topic === topico) {
-          const nivel = parseFloat(message.toString());
-          if (!isNaN(nivel) && nivel >= 0 && nivel <= 100) {
-            // Atualiza tanque
-            nivelAgua.style.height = `${nivel}%`;
-            nivelLabel.textContent = `Nível: ${nivel.toFixed(1)}%`;
-
-            // Adiciona ponto ao gráfico
-            const agora = new Date();
-            const hora = agora.toLocaleTimeString('pt-BR', {
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit'
-            });
-
-            labels.push(hora);
-            dados.push(nivel);
-
-            // Mantém os últimos 50 pontos
-            if (labels.length > 50) {
-              labels.shift();
-              dados.shift();
-            }
-
-            chart.update();
-          }
-        }
-      });
-
-      client.on('error', err => {
-        status.textContent = 'Erro de conexão MQTT';
-        console.error('Erro MQTT:', err);
-      });
-    }
-
-    carregarHistorico();
+carregarHistorico();

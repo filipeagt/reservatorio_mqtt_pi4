@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-xh=%b)8kf$em1i+7rx070(fymv=4+7#&+p36e3*y(91vf@4ts0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.15.48','db257c036432.ngrok-free.app','localhost']
+ALLOWED_HOSTS = ['192.168.1.12','251599628d42.ngrok-free.app','localhost']
 
 
 # Application definition
@@ -104,7 +104,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-br'
 
 TIME_ZONE = 'UTC'
 

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <nav id="sidebar">
+        <a class="logo" href="#">
+            <h2><span class="mdi mdi-water-check-outline"></span>AquaMonitor</h2>
+        </a>
+        <a href="index.html"><span class="mdi mdi-chart-areaspline"></span>Dashboard</a>
+        <a href="#" class="active"><span class="mdi mdi-alert-outline"></span>Alertas</a>
+        <br>
+        <a href="login.html" class="login"><span class="mdi mdi-login"></span>Login</a>
+        <a href="restrita.html" class="logout esconde"><span class="mdi mdi-logout"></span>Logout</a>
+    </nav>
+    <main>
+        <header>
+            <h1>Alertas</h1>
+            <p class="disabled">Histórico de alertas</p>
+        </header>
+        <section id="tabela">
+            <table id="alertas">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th>Evento</th>
+                        <th>Data</th>
+                        <th>Hora</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">1</th>
+                        <td>Nível baixo</td>
+                        <td>07/07/2025</td>
+                        <td>10:18</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">2</th>
+                        <td>Risco de transbordamento</td>
+                        <td>07/07/2025</td>
+                        <td>10:18</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">1</th>
+                        <td>Nível baixo</td>
+                        <td>07/07/2025</td>
+                        <td>10:18</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">2</th>
+                        <td>Risco de transbordamento</td>
+                        <td>07/07/2025</td>
+                        <td>10:18</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">1</th>
+                        <td>Nível baixo</td>
+                        <td>07/07/2025</td>
+                        <td>10:18</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">2</th>
+                        <td>Risco de transbordamento</td>
+                        <td>07/07/2025</td>
+                        <td>10:18</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">1</th>
+                        <td>Nível baixo</td>
+                        <td>07/07/2025</td>
+                        <td>10:18</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">2</th>
+                        <td>Risco de transbordamento</td>
+                        <td>07/07/2025</td>
+                        <td>10:18</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">1</th>
+                        <td>Nível baixo</td>
+                        <td>07/07/2025</td>
+                        <td>10:18</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">2</th>
+                        <td>Risco de transbordamento</td>
+                        <td>07/07/2025</td>
+                        <td>10:18</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        <nav id="paginacao">
+            <ul class="pagination">
+                <li class="page-item disabled"><a class="page-link" href="#">Anterior</a></li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item"><a class="page-link" href="#">Próxima</a></li>
+            </ul>
+        </nav>
+        <footer>
+            <p>Desenvoldo para o projeto integrador IV - Univesp</p>
+        </footer>
+    </main>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
