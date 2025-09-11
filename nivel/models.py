@@ -6,3 +6,10 @@ class NivelReservatorio(models.Model):
 
     def __str__(self):
         return f"{self.timestamp} - {self.nivel}"
+
+class VazaoReservatorio(models.Model):
+    vazao = models.IntegerField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.timestamp} - {self.vazao}"

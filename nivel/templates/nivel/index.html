@@ -19,10 +19,10 @@
             <h2><span class="mdi mdi-water-check-outline"></span>AquaMonitor</h2>
         </a>
         <a href="#" class="active"><span class="mdi mdi-chart-areaspline"></span>Dashboard</a>
-        <a href="alertas.html"><span class="mdi mdi-alert-outline"></span>Alertas</a>
+        <a href="alertas.html" class="esconde"><span class="mdi mdi-alert-outline"></span>Alertas</a>
         <br>
         <a href="login.html" class="login esconde"><span class="mdi mdi-login"></span>Login</a>
-        <a href="restrita.html" class="logout"><span class="mdi mdi-logout"></span>Logout</a>
+        <a href="restrita.html" class="logout esconde"><span class="mdi mdi-logout"></span>Logout</a>
     </nav>
     <main>
         <header>
@@ -35,11 +35,11 @@
                 <span id="volume-meter-label" class="valor">500</span><span class="unidade"> L</span>
                 <progress id="volume-meter" value="800" min="0" max="1000"></progress>
                 <span class="mdi mdi-water-alert status" id="status-volume"> Normal</span>
-                <p class="legenda disabled">Autonomia ??h</p>
+                <p class="legenda disabled">Autonomia <span id="tempo-autonomia">??</span> h</p>
             </div>
             <div class="card">
                 <h3 class="disabled"><span class="mdi mdi-water-pump"></span>Vazão</h3>
-                <span class="valor">20</span><span class="unidade"> L/h</span>
+                <span class="valor" id="valor-vazao">20</span><span class="unidade"> L/h</span>
                 <p class="legenda disabled">Consumo atual</p>
             </div>
             <div class="card">
@@ -58,10 +58,11 @@
         </section>
         <section id="charts">
             <div class="chart">
-                <canvas id="waterVolumeChart"
-                    style="display: block; box-sizing: border-box; width: 90%; height: 90%;"></canvas>
+                <canvas id="waterVolumeChart"></canvas>
             </div>
-            <div class="chart"></div>
+            <div class="chart">
+                <canvas id="waterVazaoChart"></canvas>
+            </div>
             <div class="chart"></div>
             <div class="chart"></div>
         </section>

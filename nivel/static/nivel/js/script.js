@@ -4,19 +4,25 @@ const statusVolume = document.getElementById('status-volume');
 const mqttStatusTxt = document.getElementById('mqtt-status-txt');
 const ledMqtt = document.getElementById('status-mqtt');
 const mqttValor = document.getElementById('valor-mqtt');
-const ctxVolume = document.getElementById('waterVolumeChart').getContext('2d');
+const valorVazao = document.getElementById('valor-vazao');
+const tempoAutonomia = document.getElementById('tempo-autonomia');
 
-const labels = [];
-const dados = [];
+const ctxVolume = document.getElementById('waterVolumeChart').getContext('2d');
+const ctxVazao = document.getElementById('waterVazaoChart').getContext('2d');
+
+const labelsVolume = [];
+const dadosVolume = [];
+const labelsVazao = [];
+const dadosVazao = [];
 
 // Cria o gráfico inicialmente vazio
 const chartVolume = new Chart(ctxVolume, {
   type: 'line',
   data: {
-    labels: labels,
+    labels: labelsVolume,
     datasets: [{
       label: 'Volume (L)',
-      data: dados,
+      data: dadosVolume,
       backgroundColor: '#63E4F2',
       borderColor: '#2ECEF2',
       borderWidth: 2,
@@ -48,10 +54,48 @@ const chartVolume = new Chart(ctxVolume, {
   }
 });
 
+const chartVazao = new Chart(ctxVazao, {
+  type: 'bar',
+  data: {
+    labels: labelsVazao,
+    datasets: [{
+      label: 'Vazão (L/h)',
+      data: dadosVazao,
+      backgroundColor: '#63E4F2',
+      borderColor: '#2ECEF2',
+      borderWidth: 2,
+      fill: true,
+      tension: 0.3,
+      pointRadius: 2
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: true,
+    scales: {
+      y: {
+        min: 0,
+        max: 1800,
+        title: {
+          display: true,
+          text: 'Vazão (L/h)'
+        }
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Horário'
+        }
+      }
+    }
+  }
+});
+
 // Carrega dados do JSON local
-async function carregarHistorico() {
+async function carregarHistoricoVolume() {
   try {
-    const response = await fetch('historico.json');
+    const response = await fetch('volume.json');
     const json = await response.json();
     const feeds = json.feeds;
 
@@ -61,15 +105,15 @@ async function carregarHistorico() {
       const hora = data.toLocaleString('pt-BR');
 
       if (!isNaN(volume)) {
-        labels.push(hora);
-        dados.push(volume);
+        labelsVolume.push(hora);
+        dadosVolume.push(volume);
       }
     });
 
     chartVolume.update();
 
     // Atualiza tanque com o último valor do histórico
-    const ultimoVolume = parseInt(dados[dados.length - 1]);
+    const ultimoVolume = parseInt(dadosVolume[dadosVolume.length - 1]);
     atualizaTanque(ultimoVolume);
 
     mqttStatusTxt.textContent = 'Dados históricos carregados';
@@ -77,7 +121,36 @@ async function carregarHistorico() {
     conectarMQTT();
 
   } catch (err) {
-    mqttStatusTxt.textContent = 'Erro ao carregar o arquivo JSON';
+    mqttStatusTxt.textContent = 'Erro ao carregar o arquivo volume.json';
+    console.error(err);
+  }
+}
+
+async function carregarHistoricoVazao() {
+  try {
+    const response = await fetch('vazao.json');
+    const json = await response.json();
+    const feeds = json.feeds;
+
+    feeds.forEach(feed => {
+      const vazao = parseFloat(feed.field1);
+      const data = new Date(feed.created_at);
+      const hora = data.toLocaleString('pt-BR');
+
+      if (!isNaN(vazao)) {
+        labelsVazao.push(hora);
+        dadosVazao.push(vazao);
+      }
+    });
+
+    chartVazao.update();
+
+    // Atualiza tanque com o último valor do histórico
+    //const ultimaVazao = parseInt(dadosVazao[dadosVazao.length - 1]);
+    //atualizaCardVazao(ultimaVazao);
+
+  } catch (err) {
+    mqttStatusTxt.textContent = 'Erro ao carregar o arquivo vazao.json';
     console.error(err);
   }
 }
@@ -85,21 +158,26 @@ async function carregarHistorico() {
 // Conecta ao broker MQTT
 function conectarMQTT() {
   const broker = 'wss://test.mosquitto.org:8081';
-  const topico = 'pi/reservatorio/volume';
+  const topicoVolume = 'pi/reservatorio/volume';
+  const topicoVazao = 'pi/reservatorio/vazao';
 
   const client = mqtt.connect(broker);
 
   client.on('connect', () => {
     mqttValor.textContent = 'Conectado';
-    mqttStatusTxt.textContent = `Inscrito no tópico "${topico}"`;
+    mqttStatusTxt.textContent = `Inscrito nos tópicos "${topicoVolume}" e "${topicoVazao}"`;
     ledMqtt.classList.remove('alert');
     ledMqtt.classList.add('on');
-    client.subscribe(topico);
+
+    // Inscreve nos dois tópicos
+    client.subscribe([topicoVolume, topicoVazao]);
   });
 
   client.on('message', (topic, message) => {
-    if (topic === topico) {
-      const volume = parseInt(message.toString());
+    const payload = message.toString();
+
+    if (topic === topicoVolume) {
+      const volume = parseInt(payload);
       if (!isNaN(volume) && volume >= 0 && volume <= 1000) {
         // Atualiza tanque
         atualizaTanque(volume);
@@ -108,22 +186,44 @@ function conectarMQTT() {
         const agora = new Date();
         const hora = agora.toLocaleString('pt-BR');
 
-        labels.push(hora);
-        dados.push(volume);
+        labelsVolume.push(hora);
+        dadosVolume.push(volume);
 
         // Mantém os últimos 50 pontos
-        if (labels.length > 50) {
-          labels.shift();
-          dados.shift();
+        if (labelsVolume.length > 50) {
+          labelsVolume.shift();
+          dadosVolume.shift();
         }
 
         chartVolume.update();
+      }
+
+    } else if (topic === topicoVazao) {
+      const vazao = parseInt(payload);
+      if (!isNaN(vazao) && vazao >= 0 && vazao <= 1800) {
+        // Atualiza card
+        atualizaCardVazao(vazao);
+
+        // Adiciona ponto ao gráfico
+        const agora = new Date();
+        const hora = agora.toLocaleString('pt-BR');
+
+        labelsVazao.push(hora);
+        dadosVazao.push(vazao);
+
+        // Mantém os últimos 50 pontos
+        if (labelsVazao.length > 50) {
+          labelsVazao.shift();
+          dadosVazao.shift();
+        }
+
+        chartVazao.update();
       }
     }
   });
 
   client.on('error', err => {
-    mqttValor.textContent = 'Erro'
+    mqttValor.textContent = 'Erro';
     mqttStatusTxt.textContent = 'Não foi possível conectar ao broker';
     ledMqtt.classList.remove('alert');
     ledMqtt.classList.add('off');
@@ -148,4 +248,11 @@ function atualizaTanque(ultimoVolume) {
   }
 }
 
-carregarHistorico();
+function atualizaCardVazao(ultimaVazao) {
+  valorVazao.textContent = `${ultimaVazao}`;
+  let autonomia = parseInt(parseInt(dadosVolume[dadosVolume.length - 1]) / ultimaVazao); 
+  tempoAutonomia.textContent = `${autonomia}`;
+}
+
+carregarHistoricoVolume();
+carregarHistoricoVazao();

@@ -3,5 +3,6 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('historico.json', views.historico_json, name='historico_json'),
+    path('volume.json', views.volume_json, name='volume_json'),
+    path('vazao.json', views.vazao_json, name='vazao_json'),
 ]

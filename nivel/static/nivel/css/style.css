@@ -231,6 +231,13 @@ main {
     margin: 5px 0px;
 }
 
+#charts>.chart>canvas {
+    display: block;
+    box-sizing: border-box;
+    width: 90%;
+    height: 90%;
+}
+
 #tabela {
     display: flex;
     flex-flow: column nowrap;
