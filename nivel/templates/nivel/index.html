@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!--script src="https://cdn.jsdelivr.net/npm/luxon@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1"></script-->
 </head>
 
 <body>
@@ -44,10 +46,10 @@
             </div>
             <div class="card">
                 <h3 class="disabled"><span class="mdi mdi-pump"></span>Bomba</h3>
-                <span id="status-bomba" class="status on"></span>
-                <span class="valor">Ligada</span>
-                <button><span class="mdi mdi-power"></span></button>
-                <p class="legenda disabled">Ligada às 12:22</p>
+                <span id="status-bomba" class="status off"></span>
+                <span id="valor-bomba" class="valor">Desligada</span>
+                <button id="power-bomba"><span class="mdi mdi-power"></span></button>
+                <p id="hora-bomba" class="legenda disabled">...</p>
             </div>
             <div class="card">
                 <h3 class="disabled"><span class="mdi mdi-wifi-check"></span>MQTT</h3>

@@ -6,6 +6,8 @@ const ledMqtt = document.getElementById('status-mqtt');
 const mqttValor = document.getElementById('valor-mqtt');
 const valorVazao = document.getElementById('valor-vazao');
 const tempoAutonomia = document.getElementById('tempo-autonomia');
+const ledBomba = document.getElementById('status-bomba');
+let bombaLigada = false;
 
 const ctxVolume = document.getElementById('waterVolumeChart').getContext('2d');
 const ctxVazao = document.getElementById('waterVazaoChart').getContext('2d');
@@ -14,6 +16,8 @@ const labelsVolume = [];
 const dadosVolume = [];
 const labelsVazao = [];
 const dadosVazao = [];
+const labelsBomba = [];
+const dadosBomba = [];
 
 // Cria o gráfico inicialmente vazio
 const chartVolume = new Chart(ctxVolume, {
@@ -21,7 +25,7 @@ const chartVolume = new Chart(ctxVolume, {
   data: {
     labels: labelsVolume,
     datasets: [{
-      label: 'Volume (L)',
+      label: 'Volume',
       data: dadosVolume,
       backgroundColor: '#63E4F2',
       borderColor: '#2ECEF2',
@@ -41,7 +45,7 @@ const chartVolume = new Chart(ctxVolume, {
         max: 1000,
         title: {
           display: true,
-          text: 'Volume (L)'
+          text: 'L'
         }
       },
       x: {
@@ -59,7 +63,7 @@ const chartVazao = new Chart(ctxVazao, {
   data: {
     labels: labelsVazao,
     datasets: [{
-      label: 'Vazão (L/h)',
+      label: 'Vazão',
       data: dadosVazao,
       backgroundColor: '#63E4F2',
       borderColor: '#2ECEF2',
@@ -79,7 +83,7 @@ const chartVazao = new Chart(ctxVazao, {
         max: 1800,
         title: {
           display: true,
-          text: 'Vazão (L/h)'
+          text: 'L/h'
         }
       },
       x: {
@@ -113,7 +117,7 @@ async function carregarHistoricoVolume() {
     chartVolume.update();
 
     // Atualiza tanque com o último valor do histórico
-    const ultimoVolume = parseInt(dadosVolume[dadosVolume.length - 1]);
+    let ultimoVolume = parseInt(dadosVolume[dadosVolume.length - 1]);
     atualizaTanque(ultimoVolume);
 
     mqttStatusTxt.textContent = 'Dados históricos carregados';
@@ -146,8 +150,37 @@ async function carregarHistoricoVazao() {
     chartVazao.update();
 
     // Atualiza tanque com o último valor do histórico
-    //const ultimaVazao = parseInt(dadosVazao[dadosVazao.length - 1]);
-    //atualizaCardVazao(ultimaVazao);
+    let ultimaVazao = parseInt(dadosVazao[dadosVazao.length - 1]);
+    atualizaCardVazao(ultimaVazao);
+
+  } catch (err) {
+    mqttStatusTxt.textContent = 'Erro ao carregar o arquivo vazao.json';
+    console.error(err);
+  }
+}
+
+async function carregarHistoricoBomba() {
+  try {
+    const response = await fetch('bomba.json');
+    const json = await response.json();
+    const feeds = json.feeds;
+
+    feeds.forEach(feed => {
+      const status = toString(feed.field1);
+      const data = new Date(feed.created_at);
+      const hora = data.toLocaleString('pt-BR');
+
+      if (status === "on" || status === "off") {
+        labelsBomba.push(hora);
+        dadosBomba.push(status === "on" ? 1 : 0);
+      }
+    });
+
+    //chartBomba.update();
+
+    // Atualiza tanque com o último valor do histórico
+    let ultimoStatus = parseInt(dadosBomba[dadosBomba.length - 1]);
+    atualizaCardBomba(ultimoStatus);
 
   } catch (err) {
     mqttStatusTxt.textContent = 'Erro ao carregar o arquivo vazao.json';
@@ -160,6 +193,7 @@ function conectarMQTT() {
   const broker = 'wss://test.mosquitto.org:8081';
   const topicoVolume = 'pi/reservatorio/volume';
   const topicoVazao = 'pi/reservatorio/vazao';
+  const topicoBomba = 'pi/reservatorio/bomba';
 
   const client = mqtt.connect(broker);
 
@@ -229,6 +263,19 @@ function conectarMQTT() {
     ledMqtt.classList.add('off');
     console.error('Erro MQTT:', err);
   });
+
+  document.getElementById('power-bomba').addEventListener('click', () => {
+    bombaLigada = !bombaLigada;
+    const comando = bombaLigada ? 'on' : 'off';
+
+    client.publish(topicoBomba, comando, (err) => {
+      if (err) {
+        console.error('Erro ao publicar:', err);
+      } else {
+        atualizaCardBomba();
+      }
+    });
+  });
 }
 
 function atualizaTanque(ultimoVolume) {
@@ -250,9 +297,19 @@ function atualizaTanque(ultimoVolume) {
 
 function atualizaCardVazao(ultimaVazao) {
   valorVazao.textContent = `${ultimaVazao}`;
-  let autonomia = parseInt(parseInt(dadosVolume[dadosVolume.length - 1]) / ultimaVazao); 
+  let autonomia = parseInt(parseInt(dadosVolume[dadosVolume.length - 1]) / ultimaVazao);
   tempoAutonomia.textContent = `${autonomia}`;
+}
+
+function atualizaCardBomba(ultimoStatus) {
+  let hora = new Date().toLocaleTimeString();
+  let texto = ultimoStatus === 1 || 'on' ? 'Ligada' : 'Desligada'; //erro aqui
+  document.getElementById('valor-bomba').textContent = texto;
+  document.getElementById('hora-bomba').textContent = `${texto} às ${hora}`;
+  ledBomba.className = 'status';
+  ledBomba.classList.add(bombaLigada ? 'on' : 'off');
 }
 
 carregarHistoricoVolume();
 carregarHistoricoVazao();
+carregarHistoricoBomba();

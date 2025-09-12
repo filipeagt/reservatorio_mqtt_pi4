@@ -13,3 +13,10 @@ class VazaoReservatorio(models.Model):
 
     def __str__(self):
         return f"{self.timestamp} - {self.vazao}"
+    
+class BombaReservatorio(models.Model):
+    status = models.CharField(max_length=3)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.timestamp} - {self. status}"
