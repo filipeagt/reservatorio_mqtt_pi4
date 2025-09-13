@@ -7,7 +7,6 @@ const mqttValor = document.getElementById('valor-mqtt');
 const valorVazao = document.getElementById('valor-vazao');
 const tempoAutonomia = document.getElementById('tempo-autonomia');
 const ledBomba = document.getElementById('status-bomba');
-let bombaLigada = false;
 
 const ctxVolume = document.getElementById('waterVolumeChart').getContext('2d');
 const ctxVazao = document.getElementById('waterVazaoChart').getContext('2d');
@@ -98,6 +97,7 @@ const chartVazao = new Chart(ctxVazao, {
 
 // Carrega dados do JSON local
 async function carregarHistoricoVolume() {
+  await carregarHistoricoVazao();
   try {
     const response = await fetch('volume.json');
     const json = await response.json();
@@ -117,7 +117,7 @@ async function carregarHistoricoVolume() {
     chartVolume.update();
 
     // Atualiza tanque com o último valor do histórico
-    let ultimoVolume = parseInt(dadosVolume[dadosVolume.length - 1]);
+    let ultimoVolume = parseInt(feeds[feeds.length - 1].field1);
     atualizaTanque(ultimoVolume);
 
     mqttStatusTxt.textContent = 'Dados históricos carregados';
@@ -131,13 +131,14 @@ async function carregarHistoricoVolume() {
 }
 
 async function carregarHistoricoVazao() {
+  await carregarHistoricoBomba();
   try {
     const response = await fetch('vazao.json');
     const json = await response.json();
     const feeds = json.feeds;
 
     feeds.forEach(feed => {
-      const vazao = parseFloat(feed.field1);
+      const vazao = parseInt(feed.field1);
       const data = new Date(feed.created_at);
       const hora = data.toLocaleString('pt-BR');
 
@@ -150,7 +151,7 @@ async function carregarHistoricoVazao() {
     chartVazao.update();
 
     // Atualiza tanque com o último valor do histórico
-    let ultimaVazao = parseInt(dadosVazao[dadosVazao.length - 1]);
+    let ultimaVazao = parseInt(feeds[feeds.length - 1].field1);
     atualizaCardVazao(ultimaVazao);
 
   } catch (err) {
@@ -164,9 +165,8 @@ async function carregarHistoricoBomba() {
     const response = await fetch('bomba.json');
     const json = await response.json();
     const feeds = json.feeds;
-
     feeds.forEach(feed => {
-      const status = toString(feed.field1);
+      const status = String(feed.field1);
       const data = new Date(feed.created_at);
       const hora = data.toLocaleString('pt-BR');
 
@@ -179,11 +179,12 @@ async function carregarHistoricoBomba() {
     //chartBomba.update();
 
     // Atualiza tanque com o último valor do histórico
-    let ultimoStatus = parseInt(dadosBomba[dadosBomba.length - 1]);
-    atualizaCardBomba(ultimoStatus);
+    let ultimoStatus = feeds[feeds.length - 1].field1 == 'on' ? 1 : 0;
+    let ultimaHora = new Date(feeds[feeds.length - 1].created_at).toLocaleTimeString('pt-BR');
+    atualizaCardBomba(ultimoStatus, ultimaHora);
 
   } catch (err) {
-    mqttStatusTxt.textContent = 'Erro ao carregar o arquivo vazao.json';
+    mqttStatusTxt.textContent = 'Erro ao carregar o arquivo bomba.json';
     console.error(err);
   }
 }
@@ -199,12 +200,12 @@ function conectarMQTT() {
 
   client.on('connect', () => {
     mqttValor.textContent = 'Conectado';
-    mqttStatusTxt.textContent = `Inscrito nos tópicos "${topicoVolume}" e "${topicoVazao}"`;
+    mqttStatusTxt.textContent = `Inscrito nos tópicos de volume, vazão e status da bomba`;
     ledMqtt.classList.remove('alert');
     ledMqtt.classList.add('on');
 
     // Inscreve nos dois tópicos
-    client.subscribe([topicoVolume, topicoVazao]);
+    client.subscribe([topicoVolume, topicoVazao, topicoBomba]);
   });
 
   client.on('message', (topic, message) => {
@@ -253,6 +254,27 @@ function conectarMQTT() {
 
         chartVazao.update();
       }
+    } else if (topic === topicoBomba) {
+      const estado = payload;
+      if (estado === 'on' || estado === 'off') {
+        // Adiciona ponto aos dados que irão para o gráfico
+        const agora = new Date();
+        const hora = agora.toLocaleTimeString('pt-BR');
+        const dadoAtual = estado === 'on' ? 1 : 0;
+
+        labelsBomba.push(hora);
+        dadosBomba.push(dadoAtual);
+
+        atualizaCardBomba(dadoAtual, hora);
+
+        // Mantém os últimos 50 pontos
+        /*if (labelsVazao.length > 50) {
+          labelsVazao.shift();
+          dadosVazao.shift();
+        }
+
+        chartVazao.update();*/
+      }
     }
   });
 
@@ -265,20 +287,19 @@ function conectarMQTT() {
   });
 
   document.getElementById('power-bomba').addEventListener('click', () => {
-    bombaLigada = !bombaLigada;
-    const comando = bombaLigada ? 'on' : 'off';
+    const ultimoDado = dadosBomba[dadosBomba.length - 1];
+    const comando = ultimoDado === 1 ? 'off' : 'on';
 
     client.publish(topicoBomba, comando, (err) => {
       if (err) {
         console.error('Erro ao publicar:', err);
-      } else {
-        atualizaCardBomba();
       }
     });
   });
 }
 
 function atualizaTanque(ultimoVolume) {
+  let ultimaVazao = dadosVazao[dadosVazao.length -1];
   volumeAgua.value = `${ultimoVolume}`;
   volumeLabel.textContent = `${ultimoVolume}`;
   statusVolume.className = 'mdi mdi-water-alert status';
@@ -293,23 +314,24 @@ function atualizaTanque(ultimoVolume) {
     statusVolume.classList.add('alert');
     alert('Risco de transbordamento!');
   }
+  if (ultimaVazao > 0) {
+    let autonomia = parseInt(ultimoVolume / ultimaVazao);
+    tempoAutonomia.textContent = `${autonomia}`;
+  } else {
+    tempoAutonomia.textContent = '-'
+  }
 }
 
 function atualizaCardVazao(ultimaVazao) {
-  valorVazao.textContent = `${ultimaVazao}`;
-  let autonomia = parseInt(parseInt(dadosVolume[dadosVolume.length - 1]) / ultimaVazao);
-  tempoAutonomia.textContent = `${autonomia}`;
+  valorVazao.textContent = `${ultimaVazao}`;  
 }
 
-function atualizaCardBomba(ultimoStatus) {
-  let hora = new Date().toLocaleTimeString();
-  let texto = ultimoStatus === 1 || 'on' ? 'Ligada' : 'Desligada'; //erro aqui
+function atualizaCardBomba(status, hora) {
+  let texto = status === 1 ? 'Ligada' : 'Desligada';
   document.getElementById('valor-bomba').textContent = texto;
   document.getElementById('hora-bomba').textContent = `${texto} às ${hora}`;
   ledBomba.className = 'status';
-  ledBomba.classList.add(bombaLigada ? 'on' : 'off');
+  ledBomba.classList.add(status === 1 ? 'on' : 'off');
 }
 
 carregarHistoricoVolume();
-carregarHistoricoVazao();
-carregarHistoricoBomba();
