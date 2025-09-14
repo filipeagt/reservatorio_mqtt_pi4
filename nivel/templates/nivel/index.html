@@ -11,8 +11,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!--script src="https://cdn.jsdelivr.net/npm/luxon@3"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1"></script-->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    
 </head>
 
 <body>
@@ -60,13 +60,17 @@
         </section>
         <section id="charts">
             <div class="chart">
-                <canvas id="waterVolumeChart"></canvas>
+                <canvas id="VolumeChart"></canvas>
             </div>
             <div class="chart">
-                <canvas id="waterVazaoChart"></canvas>
+                <canvas id="VazaoChart"></canvas>
             </div>
-            <div class="chart"></div>
-            <div class="chart"></div>
+            <div class="chart">
+                <canvas id="statusBomba"></canvas>
+            </div>
+            <div class="chart">
+                <canvas id="tempoOnOff"></canvas>
+            </div>
         </section>
         <footer>
             <p>Desenvoldo para o projeto integrador IV - Univesp</p>

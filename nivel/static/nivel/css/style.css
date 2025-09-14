@@ -239,6 +239,10 @@ main {
     height: 90%;
 }
 
+canvas#tempoOnOff {
+    margin: auto;
+}
+
 #tabela {
     display: flex;
     flex-flow: column nowrap;

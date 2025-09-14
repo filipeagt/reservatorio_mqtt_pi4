@@ -8,17 +8,21 @@ const valorVazao = document.getElementById('valor-vazao');
 const tempoAutonomia = document.getElementById('tempo-autonomia');
 const ledBomba = document.getElementById('status-bomba');
 
-const ctxVolume = document.getElementById('waterVolumeChart').getContext('2d');
-const ctxVazao = document.getElementById('waterVazaoChart').getContext('2d');
+const ctxVolume = document.getElementById('VolumeChart').getContext('2d');
+const ctxVazao = document.getElementById('VazaoChart').getContext('2d');
+const ctxStatusBomba = document.getElementById('statusBomba').getContext('2d');
+const ctxTempoOnOff = document.getElementById('tempoOnOff').getContext('2d');
 
 const labelsVolume = [];
 const dadosVolume = [];
 const labelsVazao = [];
 const dadosVazao = [];
-const labelsBomba = [];
+
 const dadosBomba = [];
+const temposOnOff = [];
 
 // Cria o gráfico inicialmente vazio
+// Volume
 const chartVolume = new Chart(ctxVolume, {
   type: 'line',
   data: {
@@ -57,6 +61,7 @@ const chartVolume = new Chart(ctxVolume, {
   }
 });
 
+// Vazão
 const chartVazao = new Chart(ctxVazao, {
   type: 'bar',
   data: {
@@ -92,6 +97,77 @@ const chartVazao = new Chart(ctxVazao, {
         }
       }
     }
+  }
+});
+
+// Status bomba
+const chartStatusBomba = new Chart(ctxStatusBomba, {
+  type: 'line',
+  data: {
+    datasets: [{
+      label: 'Estado da Bomba',
+      data: dadosBomba,
+      backgroundColor: '#63E4F2',
+      borderColor: '#2ECEF2',
+      borderWidth: 2,
+      fill: true,
+      stepped: true // Para gráfico on/off
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: true,
+    scales: {
+      y: {
+        min: -0.1,
+        max: 1.1,
+        ticks: {
+          callback: function (value) {
+            if (value === 1) return 'Ligada';
+            if (value === 0) return 'Desligada';
+          }
+        },
+        title: {
+          display: true,
+          text: 'Estado'
+        }
+      },
+      x: {
+        type: 'time',
+        time: {
+          unit: 'hour',
+          tooltipFormat: "dd/MM/yyyy HH:mm:ss",
+          displayFormats: {
+            hour: "dd/MM/yyyy HH:mm"
+          }
+        },
+        title: {
+          display: true,
+          text: 'Tempo'
+        }
+      }
+    }
+  }
+});
+
+// Status bomba
+const chartOnOff = new Chart(ctxTempoOnOff, {
+  type: 'pie',
+  data: {
+    labels: [
+      'Bomba Ligada',
+      'Bomba Desligada'
+    ],
+    datasets: [{
+      label: 'Tempo em minutos',
+      data: temposOnOff,
+      backgroundColor: [
+        '#2ECEF2',
+        '#263173'
+      ],
+      hoverOffset: 4
+    }]
   }
 });
 
@@ -165,22 +241,57 @@ async function carregarHistoricoBomba() {
     const response = await fetch('bomba.json');
     const json = await response.json();
     const feeds = json.feeds;
+
+    let temposOn = [];
+    let temposOff = [];
+    let somaTemposOn = 0;
+    let somaTemposOff = 0;
+
     feeds.forEach(feed => {
       const status = String(feed.field1);
       const data = new Date(feed.created_at);
-      const hora = data.toLocaleString('pt-BR');
-
+      
       if (status === "on" || status === "off") {
-        labelsBomba.push(hora);
-        dadosBomba.push(status === "on" ? 1 : 0);
+        dadosBomba.push({
+          x: data,
+          y: status === 'on' ? 1 : 0
+        });
       }
     });
 
-    //chartBomba.update();
+    for (let i = 1; i < feeds.length; i++) {
+      const anterior = feeds[i - 1];
+      const atual = feeds[i];
+
+      const tAnterior = new Date(anterior.created_at);
+      const tAtual = new Date(atual.created_at);
+      const diff = (tAtual - tAnterior) / 1000 / 60; // minutos
+
+      // Considera somente transições de estado
+      if (anterior.field1 === "on" && atual.field1 === "off") {
+        temposOn.push(diff);      // tempo ligada
+      } else if (anterior.field1 === "off" && atual.field1 === "on") {
+        temposOff.push(diff);     // tempo desligada
+      }
+    }
+
+    // somatórios usando for
+    for (let i = 0; i < temposOn.length; i++) {
+      somaTemposOn += temposOn[i];
+    }
+    temposOnOff.push(Math.round(somaTemposOn));
+
+    for (let i = 0; i < temposOff.length; i++) {
+      somaTemposOff += temposOff[i];
+    }
+    temposOnOff.push(Math.round(somaTemposOff));
+
+    chartStatusBomba.update();
+    chartOnOff.update();
 
     // Atualiza tanque com o último valor do histórico
     let ultimoStatus = feeds[feeds.length - 1].field1 == 'on' ? 1 : 0;
-    let ultimaHora = new Date(feeds[feeds.length - 1].created_at).toLocaleTimeString('pt-BR');
+    let ultimaHora = new Date(feeds[feeds.length - 1].created_at).toLocaleString('pt-BR');
     atualizaCardBomba(ultimoStatus, ultimaHora);
 
   } catch (err) {
@@ -259,21 +370,20 @@ function conectarMQTT() {
       if (estado === 'on' || estado === 'off') {
         // Adiciona ponto aos dados que irão para o gráfico
         const agora = new Date();
-        const hora = agora.toLocaleTimeString('pt-BR');
+        const hora = agora.toLocaleString('pt-BR');
         const dadoAtual = estado === 'on' ? 1 : 0;
 
-        labelsBomba.push(hora);
-        dadosBomba.push(dadoAtual);
+        dadosBomba.push({x: agora, y: dadoAtual});
 
         atualizaCardBomba(dadoAtual, hora);
 
         // Mantém os últimos 50 pontos
-        /*if (labelsVazao.length > 50) {
+        if (labelsVazao.length > 50) {
           labelsVazao.shift();
           dadosVazao.shift();
         }
 
-        chartVazao.update();*/
+        chartVazao.update();
       }
     }
   });
@@ -287,7 +397,7 @@ function conectarMQTT() {
   });
 
   document.getElementById('power-bomba').addEventListener('click', () => {
-    const ultimoDado = dadosBomba[dadosBomba.length - 1];
+    const ultimoDado = dadosBomba[dadosBomba.length - 1].y;
     const comando = ultimoDado === 1 ? 'off' : 'on';
 
     client.publish(topicoBomba, comando, (err) => {
@@ -299,7 +409,7 @@ function conectarMQTT() {
 }
 
 function atualizaTanque(ultimoVolume) {
-  let ultimaVazao = dadosVazao[dadosVazao.length -1];
+  let ultimaVazao = dadosVazao[dadosVazao.length - 1];
   volumeAgua.value = `${ultimoVolume}`;
   volumeLabel.textContent = `${ultimoVolume}`;
   statusVolume.className = 'mdi mdi-water-alert status';
@@ -323,7 +433,7 @@ function atualizaTanque(ultimoVolume) {
 }
 
 function atualizaCardVazao(ultimaVazao) {
-  valorVazao.textContent = `${ultimaVazao}`;  
+  valorVazao.textContent = `${ultimaVazao}`;
 }
 
 function atualizaCardBomba(status, hora) {
