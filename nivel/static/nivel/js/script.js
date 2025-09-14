@@ -378,12 +378,12 @@ function conectarMQTT() {
         atualizaCardBomba(dadoAtual, hora);
 
         // Mantém os últimos 50 pontos
-        if (labelsVazao.length > 50) {
-          labelsVazao.shift();
-          dadosVazao.shift();
+        if (dadosBomba.length > 50) {
+          dadosBomba.shift();
         }
 
-        chartVazao.update();
+        chartStatusBomba.update();
+        chartOnOff.update();
       }
     }
   });
