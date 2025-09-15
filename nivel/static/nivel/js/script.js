@@ -242,6 +242,11 @@ async function carregarHistoricoBomba() {
     const json = await response.json();
     const feeds = json.feeds;
 
+    // Vai plotar um ponto virtual representando o momento de carregamento da página
+    let statusAux = feeds[feeds.length - 1].field1;
+    let tempoAux = new Date();
+    feeds.push({created_at: tempoAux, field1: statusAux});
+    console.log(feeds)
     let temposOn = [];
     let temposOff = [];
     let somaTemposOn = 0;
@@ -250,7 +255,7 @@ async function carregarHistoricoBomba() {
     feeds.forEach(feed => {
       const status = String(feed.field1);
       const data = new Date(feed.created_at);
-      
+
       if (status === "on" || status === "off") {
         dadosBomba.push({
           x: data,
@@ -261,7 +266,12 @@ async function carregarHistoricoBomba() {
 
     for (let i = 1; i < feeds.length; i++) {
       const anterior = feeds[i - 1];
-      const atual = feeds[i];
+      let aux = feeds[i];
+      if (i == feeds.length - 1) { // último ítem 
+      // ponto virtual invertido para calculo dos tempos on/off
+        aux.field1 = feeds[i].field1 == 'on' ? 'off' : 'on';
+      }
+      const atual = aux;
 
       const tAnterior = new Date(anterior.created_at);
       const tAtual = new Date(atual.created_at);
@@ -272,6 +282,8 @@ async function carregarHistoricoBomba() {
         temposOn.push(diff);      // tempo ligada
       } else if (anterior.field1 === "off" && atual.field1 === "on") {
         temposOff.push(diff);     // tempo desligada
+      } else if (anterior.field1 === atual.field1 && i < feeds.length - 1) {  // se não teve transição usa o tempo do dado anterior na próxima iteração
+        feeds[i].created_at = feeds[i - 1].created_at;
       }
     }
 
@@ -289,6 +301,8 @@ async function carregarHistoricoBomba() {
     chartStatusBomba.update();
     chartOnOff.update();
 
+    //Descarta o ponto virtual para atualizar o card
+    feeds.pop();
     // Atualiza tanque com o último valor do histórico
     let ultimoStatus = feeds[feeds.length - 1].field1 == 'on' ? 1 : 0;
     let ultimaHora = new Date(feeds[feeds.length - 1].created_at).toLocaleString('pt-BR');
@@ -336,10 +350,10 @@ function conectarMQTT() {
         dadosVolume.push(volume);
 
         // Mantém os últimos 50 pontos
-        if (labelsVolume.length > 50) {
+        /*if (labelsVolume.length > 50) {
           labelsVolume.shift();
           dadosVolume.shift();
-        }
+        }*/
 
         chartVolume.update();
       }
@@ -358,10 +372,10 @@ function conectarMQTT() {
         dadosVazao.push(vazao);
 
         // Mantém os últimos 50 pontos
-        if (labelsVazao.length > 50) {
+        /*if (labelsVazao.length > 50) {
           labelsVazao.shift();
           dadosVazao.shift();
-        }
+        }*/
 
         chartVazao.update();
       }
@@ -373,13 +387,28 @@ function conectarMQTT() {
         const hora = agora.toLocaleString('pt-BR');
         const dadoAtual = estado === 'on' ? 1 : 0;
 
-        dadosBomba.push({x: agora, y: dadoAtual});
+        dadosBomba.push({ x: agora, y: dadoAtual });
 
         atualizaCardBomba(dadoAtual, hora);
 
         // Mantém os últimos 50 pontos
-        if (dadosBomba.length > 50) {
+        /*if (dadosBomba.length > 50) {
           dadosBomba.shift();
+        }*/
+
+        // Atualiza dados para grafico pizza
+        const anterior = dadosBomba[dadosBomba.length - 2];
+        const atual = dadosBomba[dadosBomba.length - 1];
+
+        const tAnterior = new Date(anterior.x);
+        const tAtual = new Date(atual.x);
+        const diff = (tAtual - tAnterior) / 1000 / 60; // minutos
+
+        // Considera somente transições de estado
+        if (anterior.y === 1 && atual.y === 0) {
+          temposOnOff[0] += Math.round(diff);      // tempo ligada
+        } else if (anterior.y === 0 && atual.y === 1) {
+          temposOnOff[1] += Math.round(diff);     // tempo desligada
         }
 
         chartStatusBomba.update();
