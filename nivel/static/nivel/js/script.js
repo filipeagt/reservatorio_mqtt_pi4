@@ -21,6 +21,8 @@ const dadosVazao = [];
 const dadosBomba = [];
 const temposOnOff = [];
 
+const cor = ['#e6f7ff', '#F0FAFF', '#eff5fa', '#63E4F2', '#2ECEF2', '#263173'];
+
 // Cria o gráfico inicialmente vazio
 // Volume
 const chartVolume = new Chart(ctxVolume, {
@@ -30,8 +32,8 @@ const chartVolume = new Chart(ctxVolume, {
     datasets: [{
       label: 'Volume',
       data: dadosVolume,
-      backgroundColor: '#63E4F2',
-      borderColor: '#2ECEF2',
+      backgroundColor: cor[3],
+      borderColor: cor[4],
       borderWidth: 2,
       fill: true,
       tension: 0.3,
@@ -69,8 +71,8 @@ const chartVazao = new Chart(ctxVazao, {
     datasets: [{
       label: 'Vazão',
       data: dadosVazao,
-      backgroundColor: '#63E4F2',
-      borderColor: '#2ECEF2',
+      backgroundColor: cor[3],
+      borderColor: cor[4],
       borderWidth: 2,
       fill: true,
       tension: 0.3,
@@ -107,8 +109,8 @@ const chartStatusBomba = new Chart(ctxStatusBomba, {
     datasets: [{
       label: 'Estado da Bomba',
       data: dadosBomba,
-      backgroundColor: '#63E4F2',
-      borderColor: '#2ECEF2',
+      backgroundColor: cor[3],
+      borderColor: cor[4],
       borderWidth: 2,
       fill: true,
       stepped: true // Para gráfico on/off
@@ -163,8 +165,8 @@ const chartOnOff = new Chart(ctxTempoOnOff, {
       label: 'Tempo em minutos',
       data: temposOnOff,
       backgroundColor: [
-        '#2ECEF2',
-        '#263173'
+        cor[4],
+        cor[5]
       ],
       hoverOffset: 4
     }]
