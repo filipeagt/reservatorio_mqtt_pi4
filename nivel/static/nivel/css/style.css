@@ -155,9 +155,10 @@ main {
     left: 50%;
     top: 50%;
     height: 70%;
-    min-width: 30px;
+    min-width: 50px;
     writing-mode: vertical-lr;
     direction: rtl;
+    clip-path: polygon(0% 0%, 100% 0%, 85% 100%, 15% 100%);
     transform: translate(-50%, -50%);
     appearance: none;
 }
