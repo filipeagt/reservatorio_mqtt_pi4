@@ -453,16 +453,22 @@ function atualizaTanque(ultimoVolume) {
     statusVolume.classList.add('alert');
     alert('Risco de transbordamento!');
   }
-  if (ultimaVazao > 0) {
-    let autonomia = parseInt(ultimoVolume / ultimaVazao);
+  atualizaAutonomia(ultimoVolume, ultimaVazao);
+}
+
+function atualizaCardVazao(ultimaVazao) {
+  let ultimoVolume = dadosVolume[dadosVolume.length - 1];
+  valorVazao.textContent = `${ultimaVazao}`;
+  atualizaAutonomia(ultimoVolume, ultimaVazao);
+}
+
+function atualizaAutonomia(volume, vazao) {
+  if (vazao > 0) {
+    let autonomia = parseInt(volume / vazao);
     tempoAutonomia.textContent = `${autonomia}`;
   } else {
     tempoAutonomia.textContent = '-'
   }
-}
-
-function atualizaCardVazao(ultimaVazao) {
-  valorVazao.textContent = `${ultimaVazao}`;
 }
 
 function atualizaCardBomba(status, hora) {
