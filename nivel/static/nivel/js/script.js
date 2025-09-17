@@ -86,7 +86,6 @@ const chartVazao = new Chart(ctxVazao, {
     scales: {
       y: {
         min: 0,
-        max: 1800,
         title: {
           display: true,
           text: 'L/h'
@@ -200,7 +199,6 @@ async function carregarHistoricoVolume() {
 
     mqttStatusTxt.textContent = 'Dados históricos carregados';
     mqttValor.textContent = 'Conectando...';
-    conectarMQTT();
 
   } catch (err) {
     mqttStatusTxt.textContent = 'Erro ao carregar o arquivo volume.json';
@@ -248,7 +246,6 @@ async function carregarHistoricoBomba() {
     let statusAux = feeds[feeds.length - 1].field1;
     let tempoAux = new Date();
     feeds.push({created_at: tempoAux, field1: statusAux});
-    console.log(feeds)
     let temposOn = [];
     let temposOff = [];
     let somaTemposOn = 0;
@@ -317,7 +314,8 @@ async function carregarHistoricoBomba() {
 }
 
 // Conecta ao broker MQTT
-function conectarMQTT() {
+async function conectarMQTT() {
+  await carregarHistoricoVolume();
   const broker = 'wss://test.mosquitto.org:8081';
   const topicoVolume = 'pi/reservatorio/volume';
   const topicoVazao = 'pi/reservatorio/vazao';
@@ -428,7 +426,14 @@ function conectarMQTT() {
   });
 
   document.getElementById('power-bomba').addEventListener('click', () => {
-    const ultimoDado = dadosBomba[dadosBomba.length - 1].y;
+    let ultimoDado = 1;
+
+    if (typeof dadosBomba[0] !== "undefined") {
+      ultimoDado = dadosBomba[dadosBomba.length - 1].y;
+    } else {
+      dadosBomba.push({x: new Date, y: 0})
+    }
+    
     const comando = ultimoDado === 1 ? 'off' : 'on';
 
     client.publish(topicoBomba, comando, (err) => {
@@ -476,9 +481,9 @@ function atualizaAutonomia(volume, vazao) {
 function atualizaCardBomba(status, hora) {
   let texto = status === 1 ? 'Ligada' : 'Desligada';
   document.getElementById('valor-bomba').textContent = texto;
-  document.getElementById('hora-bomba').textContent = `${texto} às ${hora}`;
+  document.getElementById('hora-bomba').textContent = `${texto} ${hora}`;
   ledBomba.className = 'status';
   ledBomba.classList.add(status === 1 ? 'on' : 'off');
 }
 
-carregarHistoricoVolume();
+conectarMQTT();

@@ -34,20 +34,20 @@
         <section id="cards">
             <div class="card">
                 <h3 class="disabled"><span class="mdi mdi-cup-water"></span>Volume</h3>
-                <span id="volume-meter-label" class="valor">500</span><span class="unidade"> L</span>
-                <progress id="volume-meter" value="800" min="0" max="1000"></progress>
+                <span id="volume-meter-label" class="valor">???</span><span class="unidade"> L</span>
+                <progress id="volume-meter" value="500" min="0" max="1000"></progress>
                 <span class="mdi mdi-water-alert status" id="status-volume"> Normal</span>
                 <p class="legenda disabled">Autonomia <span id="tempo-autonomia">??</span> h</p>
             </div>
             <div class="card">
                 <h3 class="disabled"><span class="mdi mdi-water-pump"></span>Vazão</h3>
-                <span class="valor" id="valor-vazao">20</span><span class="unidade"> L/h</span>
+                <span class="valor" id="valor-vazao">??</span><span class="unidade"> L/h</span>
                 <p class="legenda disabled">Consumo atual</p>
             </div>
             <div class="card">
                 <h3 class="disabled"><span class="mdi mdi-pump"></span>Bomba</h3>
                 <span id="status-bomba" class="status alert"></span>
-                <span id="valor-bomba" class="valor">Verificando</span>
+                <span id="valor-bomba" class="valor">Dados indisponíveis</span>
                 <button id="power-bomba"><span class="mdi mdi-power"></span></button>
                 <p id="hora-bomba" class="legenda disabled">...</p>
             </div>
@@ -55,7 +55,7 @@
                 <h3 class="disabled"><span class="mdi mdi-wifi-check"></span>MQTT</h3>
                 <span id="status-mqtt" class="status alert"></span>
                 <span class="valor" id="valor-mqtt">Aguarde...</span>
-                <p id="mqtt-status-txt" class="legenda disabled">Conectado ao tópico ....</p>
+                <p id="mqtt-status-txt" class="legenda disabled">Conectando aos tópicos ....</p>
             </div>
         </section>
         <section id="charts">
