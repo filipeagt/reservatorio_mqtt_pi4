@@ -241,7 +241,10 @@ async function carregarHistoricoBomba() {
     const response = await fetch('bomba.json');
     const json = await response.json();
     const feeds = json.feeds;
-
+    if (feeds.length == 0) { //Se não tiver dados
+      feeds.push({created_at: new Date(), field1: 'off'});
+      throw new Error('Dados indisponíveis')
+    }
     // Vai plotar um ponto virtual representando o momento de carregamento da página
     let statusAux = feeds[feeds.length - 1].field1;
     let tempoAux = new Date();
@@ -381,11 +384,11 @@ async function conectarMQTT() {
       }
     } else if (topic === topicoBomba) {
       const estado = payload;
-      if (estado === 'on' || estado === 'off') {
+      if (estado === 'on_OK' || estado === 'off_OK') {
         // Adiciona ponto aos dados que irão para o gráfico
         const agora = new Date();
         const hora = agora.toLocaleString('pt-BR');
-        const dadoAtual = estado === 'on' ? 1 : 0;
+        const dadoAtual = estado === 'on_OK' ? 1 : 0;
 
         dadosBomba.push({ x: agora, y: dadoAtual });
 
@@ -428,7 +431,7 @@ async function conectarMQTT() {
   document.getElementById('power-bomba').addEventListener('click', () => {
     let ultimoDado = 1;
 
-    if (typeof dadosBomba[0] !== "undefined") {
+    if (typeof dadosBomba[0] !== "undefined") { //se tem dados salvos
       ultimoDado = dadosBomba[dadosBomba.length - 1].y;
     } else {
       dadosBomba.push({x: new Date, y: 0})

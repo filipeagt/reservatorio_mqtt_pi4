@@ -44,11 +44,13 @@ def on_message(client, userdata, msg):
                 print("Vazão fora do intervalo 0–1800")
         elif topic == TOPIC_BOMBA:
             status = str(payload)  
-            if status in ("on", "off"):
-                BombaReservatorio.objects.create(status=status)
+            if status in ("on_OK", "off_OK"):
+                BombaReservatorio.objects.create(status=status[:-3]) # Remove o '_OK'
                 print(f"[MQTT] Status recebido e salvo: {status}")
+            elif status in ("on", "off"):
+                print(f"Comando '{status}' enviado, aguardando resposta.")
             else:
-                print("Status inválido")
+                print("Status inválido!")
 
     except Exception as e:
         print(f"Erro ao processar mensagem MQTT: {e}")
