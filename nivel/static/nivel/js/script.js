@@ -7,6 +7,7 @@ const mqttValor = document.getElementById('valor-mqtt');
 const valorVazao = document.getElementById('valor-vazao');
 const tempoAutonomia = document.getElementById('tempo-autonomia');
 const ledBomba = document.getElementById('status-bomba');
+const legendaBomba = document.getElementById('legenda-bomba');
 
 const ctxVolume = document.getElementById('VolumeChart').getContext('2d');
 const ctxVazao = document.getElementById('VazaoChart').getContext('2d');
@@ -416,6 +417,10 @@ async function conectarMQTT() {
 
         chartStatusBomba.update();
         chartOnOff.update();
+      } else if (estado === '!on') {
+        legendaBomba.textContent = 'Não foi possível ligar, nível alto!';
+      } else if (estado === '!off') {
+        legendaBomba.textContent = 'Não foi possível desligar, nível baixo!';
       }
     }
   });
@@ -484,7 +489,7 @@ function atualizaAutonomia(volume, vazao) {
 function atualizaCardBomba(status, hora) {
   let texto = status === 1 ? 'Ligada' : 'Desligada';
   document.getElementById('valor-bomba').textContent = texto;
-  document.getElementById('hora-bomba').textContent = `${texto} ${hora}`;
+  legendaBomba.textContent = `${texto} ${hora}`;
   ledBomba.className = 'status';
   ledBomba.classList.add(status === 1 ? 'on' : 'off');
 }

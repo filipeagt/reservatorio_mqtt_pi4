@@ -49,6 +49,10 @@ def on_message(client, userdata, msg):
                 print(f"[MQTT] Status recebido e salvo: {status}")
             elif status in ("on", "off"):
                 print(f"Comando '{status}' enviado, aguardando resposta.")
+            elif status == "!on":
+                print("A bomba não foi ligada pois o nível máximo foi atingido.")
+            elif status == "!off":
+                print("A bomba não pode ser desligada pois o nível está abaixo do mínimo.")
             else:
                 print("Status inválido!")
 
