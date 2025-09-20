@@ -24,6 +24,8 @@ const temposOnOff = [];
 
 const cor = ['#e6f7ff', '#F0FAFF', '#eff5fa', '#63E4F2', '#2ECEF2', '#263173'];
 
+const alertaAtivo = {baixo: false, alto: false};
+
 // Cria o gráfico inicialmente vazio
 // Volume
 const chartVolume = new Chart(ctxVolume, {
@@ -457,16 +459,24 @@ function atualizaTanque(ultimoVolume) {
   volumeAgua.value = `${ultimoVolume}`;
   volumeLabel.textContent = `${ultimoVolume}`;
   statusVolume.className = 'mdi mdi-water-alert status';
-  if (ultimoVolume < 250) {
+  if (ultimoVolume < 200) {
     statusVolume.textContent = 'Baixo';
     statusVolume.classList.add('off');
-    alert('Nível baixo!');
-  } else if (ultimoVolume <= 950) {
+    if (!alertaAtivo.baixo) {
+      alertaAtivo.baixo = true;
+      alert('Nível baixo!');
+    }    
+  } else if (ultimoVolume <= 980) {
     statusVolume.textContent = 'Normal';
-  } else if (ultimoVolume > 950) {
+    alertaAtivo.baixo = false;
+    alertaAtivo.alto =  false;
+  } else if (ultimoVolume > 980) {
     statusVolume.textContent = 'Alto';
     statusVolume.classList.add('alert');
-    alert('Risco de transbordamento!');
+    if (!alertaAtivo.alto) {
+      alertaAtivo.alto = true;
+      alert('Risco de transbordamento!');
+    }
   }
   atualizaAutonomia(ultimoVolume, ultimaVazao);
 }
