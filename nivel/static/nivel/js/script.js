@@ -40,7 +40,7 @@ const chartVolume = new Chart(ctxVolume, {
       borderWidth: 2,
       fill: true,
       tension: 0.3,
-      pointRadius: 2
+      pointRadius: 0
     }]
   },
   options: {
@@ -68,7 +68,7 @@ const chartVolume = new Chart(ctxVolume, {
 
 // Vazão
 const chartVazao = new Chart(ctxVazao, {
-  type: 'bar',
+  type: 'line',
   data: {
     labels: labelsVazao,
     datasets: [{
@@ -79,7 +79,7 @@ const chartVazao = new Chart(ctxVazao, {
       borderWidth: 2,
       fill: true,
       tension: 0.3,
-      pointRadius: 2
+      pointRadius: 0
     }]
   },
   options: {
@@ -115,6 +115,7 @@ const chartStatusBomba = new Chart(ctxStatusBomba, {
       borderColor: cor[4],
       borderWidth: 2,
       fill: true,
+      pointRadius: 0,
       stepped: true // Para gráfico on/off
     }]
   },
@@ -140,10 +141,10 @@ const chartStatusBomba = new Chart(ctxStatusBomba, {
       x: {
         type: 'time',
         time: {
-          unit: 'hour',
+          unit: 'day',
           tooltipFormat: "dd/MM/yyyy HH:mm:ss",
           displayFormats: {
-            hour: "dd/MM/yyyy HH:mm"
+            day: "dd/MM/yy"
           }
         },
         title: {
