@@ -79,8 +79,17 @@ nav#sidebar>a.esconde {
 }
 
 header {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    justify-content: space-around;
     padding: 15px;
     min-height: 50px;
+}
+
+header input {
+    height: 30px;
+    width: 100px;
 }
 
 main {
