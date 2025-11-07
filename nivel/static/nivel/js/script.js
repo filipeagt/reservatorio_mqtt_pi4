@@ -8,6 +8,7 @@ const valorVazao = document.getElementById('valor-vazao');
 const tempoAutonomia = document.getElementById('tempo-autonomia');
 const ledBomba = document.getElementById('status-bomba');
 const legendaBomba = document.getElementById('legenda-bomba');
+const diasHistorico = document.getElementById('dias')
 
 const ctxVolume = document.getElementById('VolumeChart').getContext('2d');
 const ctxVazao = document.getElementById('VazaoChart').getContext('2d');
@@ -177,10 +178,10 @@ const chartOnOff = new Chart(ctxTempoOnOff, {
 });
 
 // Carrega dados do JSON local
-async function carregarHistoricoVolume() {
-  await carregarHistoricoVazao();
+async function carregarHistoricoVolume(dias) {
+  await carregarHistoricoVazao(dias);
   try {
-    const response = await fetch('volume.json');
+    const response = await fetch(`volume.json?dias=${dias}`);
     const json = await response.json();
     const feeds = json.feeds;
 
@@ -210,10 +211,10 @@ async function carregarHistoricoVolume() {
   }
 }
 
-async function carregarHistoricoVazao() {
-  await carregarHistoricoBomba();
+async function carregarHistoricoVazao(dias) {
+  await carregarHistoricoBomba(dias);
   try {
-    const response = await fetch('vazao.json');
+    const response = await fetch(`vazao.json?dias=${dias}`);
     const json = await response.json();
     const feeds = json.feeds;
 
@@ -240,9 +241,9 @@ async function carregarHistoricoVazao() {
   }
 }
 
-async function carregarHistoricoBomba() {
+async function carregarHistoricoBomba(dias) {
   try {
-    const response = await fetch('bomba.json');
+    const response = await fetch(`bomba.json?dias=${dias}`);
     const json = await response.json();
     const feeds = json.feeds;
     if (feeds.length == 0) { //Se não tiver dados
@@ -322,7 +323,7 @@ async function carregarHistoricoBomba() {
 
 // Conecta ao broker MQTT
 async function conectarMQTT() {
-  await carregarHistoricoVolume();
+  await carregarHistoricoVolume('30'); //Carrega últimos 30 dias
   const broker = 'wss://test.mosquitto.org:8081';
   const topicoVolume = 'pi/reservatorio/volume';
   const topicoVazao = 'pi/reservatorio/vazao';
@@ -504,5 +505,18 @@ function atualizaCardBomba(status, hora) {
   ledBomba.className = 'status';
   ledBomba.classList.add(status === 1 ? 'on' : 'off');
 }
+
+diasHistorico.addEventListener('change', async (e)=>{
+  
+  labelsVolume.splice(0, labelsVolume.length);
+  dadosVolume.splice(0, dadosVolume.length);
+  labelsVazao.splice(0, labelsVazao.length);
+  dadosVazao.splice(0, dadosVazao.length);
+
+  dadosBomba.splice(0, dadosBomba.length);
+  temposOnOff.splice(0, temposOnOff.length);
+
+  await carregarHistoricoVolume(diasHistorico.value);
+});
 
 conectarMQTT();
